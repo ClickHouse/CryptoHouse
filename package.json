@@ -1,0 +1,28 @@
+{
+  "name": "cryptohouse",
+  "version": "1.0.0",
+  "description": "Scripts for CrytoHouse",
+  "main": "index.js",
+  "scripts": {
+    "load_queries": "tsx load_queries.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/ClickHouse/cryptohouse"
+  },
+  "keywords": [
+    "Crypto",
+    "ClickHouse",
+    "Blockchain"
+  ],
+  "author": "Dale McDiarmid",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@clickhouse/client": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.13",
+    "tsx": "^4.16.3",
+    "typescript": "^5"
+  }
+}

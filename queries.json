@@ -1,0 +1,122 @@
+{
+    "queries": [
+        {
+            "name": "10 billion count",
+            "group": "Misc",
+            "sql": "SELECT count() FROM numbers(10000000000)"
+        },
+        {
+            "name": "Hello world",
+            "group": "Misc",
+            "sql": "SELECT 'Hello World'"
+        },
+        {
+            "name": "Total blocks",
+            "group": "Solana",
+            "sql": "SELECT count() FROM solana.blocks"
+        },
+        {
+            "name": "Total transactions",
+            "group": "Solana",
+            "sql": "SELECT count() FROM solana.transactions"
+        },
+        {
+            "name": "Total non-voting transactions",
+            "group": "Solana",
+            "sql": "SELECT count() FROM solana.transactions_non_voting"
+        },
+        {
+            "name": "Sample non-voting transactions",
+            "group": "Solana",
+            "sql": "SELECT * FROM solana.transactions_non_voting LIMIT 100"
+        },
+        {
+            "name": "Sample transactions",
+            "group": "Solana",
+            "sql": "SELECT * FROM solana.transactions LIMIT 100"
+        },
+        {
+            "name": "Sample blocks",
+            "group": "Solana",
+            "sql": "SELECT * FROM solana.blocks LIMIT 100"
+        },
+        {
+            "name": "Transactions per day",
+            "group": "Solana",
+            "comment": "Transactions per day. Uses a materialized view which aggregates per day. For more granular counts use the solana.transactions table e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoYmxvY2tfdGltZXN0YW1wKSBhcyBob3VyLCBjb3VudCgpIGFzIGNvdW50IEZST00gc29sYW5hLnRyYW5zYWN0aW9ucyBXSEVSRSBibG9ja190aW1lc3RhbXA6OkRhdGUgPSAnMjAyNC0wNy0yNCcgR1JPVVAgQlkgaG91ciBPUkRFUiBCWSBob3VyIEFTQw",
+            "sql": "SELECT date, sum(count) as count FROM solana.transactions_per_day GROUP BY date"
+        },
+        {
+            "name": "Non-voting transactions per day",
+            "group": "Solana",
+            "comment": "Non-voting transactions per day. Uses a materialized view which aggregates per day. For more granular counts use the solana.transactions_non_voting table e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoYmxvY2tfdGltZXN0YW1wKSBhcyBob3VyLCBjb3VudCgpIGFzIGNvdW50IEZST00gc29sYW5hLnRyYW5zYWN0aW9uc19ub25fdm90aW5nIFdIRVJFIGJsb2NrX3RpbWVzdGFtcDo6RGF0ZSA9ICcyMDI0LTA3LTI0JyBHUk9VUCBCWSBob3VyIE9SREVSIEJZIGhvdXIgQVND",
+            "sql": "SELECT date, sum(count) as count FROM solana.transactions_per_day_non_voting GROUP BY date"
+        },
+        {
+            "name": "Daily block and txn counts",
+            "group": "Solana",
+            "comment":"Block and transaction counts. Block counts are an estimate here - we use a materialized view with the uniq function. A more accurate count could be compute using the solana.blocks table but this will be subject to quotas e.g. https://crypto.clickhouse.com?query=U0VMRUNUCiAgZGF0ZV90cnVuYygnZGF5JywgYmxvY2tfdGltZXN0YW1wKSBhcyBkYXksCiAgdW5pcUV4YWN0KGJsb2NrX2hhc2gpIGJsb2NrX2NvdW50LAogIHN1bSh0cmFuc2FjdGlvbl9jb3VudCkgYXMgdHhuX2NvdW50CkZST00KICBzb2xhbmEuYmxvY2tzCldIRVJFCiAgZGF5ID49IHRvZGF5KCkgLSBJTlRFUlZBTCAxIE1PTlRICkdST1VQIEJZCiAgMQ",
+            "sql": "SELECT day, uniqCombinedMerge(14)(block_count) AS block_count, sumMerge(txn_count) AS txn_count FROM solana.block_txn_counts_by_day GROUP BY day ORDER BY day DESC"
+        },
+        {
+            "name": "Daily token transfer metrics",
+            "group": "Solana",
+            "comment": "Token transfer metrics. This query uses a materialized view. Results here use the uniq function are thus an estimate. For exact results, you can query the main solana.token_transfers table but will likely hit quota limits on wide time ranges. e.g. https://crypto.clickhouse.com?query=U0VMRUNUCiAgdG9TdGFydE9mRGF5KGJsb2NrX3RpbWVzdGFtcCkgYXMgZGF5LAogIHVuaXFFeGFjdCh0eF9zaWduYXR1cmUpIGFzIHRyYW5zZmVyX2NvdW50LAogIHVuaXFFeGFjdChzb3VyY2UpIGFzIHNlbmRlcl9jb3VudCwKICB1bmlxRXhhY3QoZGVzdGluYXRpb24pIGFzIHJlY2lldmVyX2NvdW50CkZST00KICBzb2xhbmEudG9rZW5fdHJhbnNmZXJzCldIRVJFCiAgZGF5ID49IHRvZGF5KCkgLSBJTlRFUlZBTCAxIFdFRUsKR1JPVVAgQlkKICAxCk9SREVSIEJZCiAgMSBERVND ",
+            "sql": "SELECT day, uniqCombinedMerge(14)(transfer_count) AS transfer_count, uniqCombinedMerge(14)(sender_count) AS sender_count, uniqCombinedMerge(14)(reciever_count) AS reciever_count FROM solana.token_transfer_metrics_by_day GROUP BY day ORDER BY day DESC"
+        },
+        {
+            "name": "Daily token transfer metrics by type",
+            "group": "Solana",
+            "comment": "Token transfer metrics by transfer type. This query limits to the last week which you can remove. The numbers are an estimate and use a materialized view. For accurate numbers, use the tokens table e.g https://crypto.clickhouse.com?query=LS0gVG9rZW4gdHJhbnNmZXIgbWV0cmljcyBieSB0cmFuc2ZlciB0eXBlClNFTEVDVAogICAgdG9TdGFydE9mRGF5KGJsb2NrX3RpbWVzdGFtcCkgYXMgZGF5LAogICAgdHJhbnNmZXJfdHlwZSwKICAgIHVuaXEodHhfc2lnbmF0dXJlKSBhcyB0cmFuc2Zlcl9jb3VudCwKICAgIHVuaXEoc291cmNlKSBhcyBzZW5kZXJfY291bnQsCiAgICB1bmlxKGRlc3RpbmF0aW9uKSBhcyByZWNpZXZlcl9jb3VudApGUk9NCiAgICBzb2xhbmEudG9rZW5fdHJhbnNmZXJzCldIRVJFCiAgICBkYXkgPj0gdG9kYXkoKSAtIElOVEVSVkFMIDEgV0VFSwpHUk9VUCBCWQogICAgZGF5LAogICAgdHJhbnNmZXJfdHlwZQ",
+            "sql": "SELECT day, transfer_type, uniqCombinedMerge(14)(transfer_count) AS transfer_count, uniqCombinedMerge(14)(sender_count) AS sender_count, uniqCombinedMerge(14)(reciever_count) AS reciever_count FROM solana.token_transfer_metrics_by_type_by_day WHERE day >= (today() - toIntervalWeek(1)) GROUP BY day, transfer_type ORDER BY day DESC, transfer_type DESC"
+        },
+        {
+            "name": "Top 100 token creators",
+            "group": "Solana",
+            "comment": "Top token creators. This query limits to the last week which you can remove. The numbers are an estimate and use a materialized view. For accurate numbers, use the tokens table e.g. https://crypto.clickhouse.com?query=LS0gdG9wIHRva2VuIGNyZWF0b3JzClNFTEVDVAogICAgY3JlYXRvcnMgWyAxIF0gLjEgYXMgY3JlYXRvcl9hZGRyZXNzLAogICAgdW5pcShtaW50KSBhcyB0b2tlbl9jb3VudApGUk9NCiAgICBzb2xhbmEudG9rZW5zCldIRVJFCiAgICBibG9ja190aW1lc3RhbXAgPj0gdG9kYXkoKSAtIElOVEVSVkFMIDEgV0VFSwogICAgQU5EIGNyZWF0b3JfYWRkcmVzcyA8PiAnJwpHUk9VUCBCWQogICAgMQpPUkRFUiBCWQogICAgMiBkZXNjCkxJTUlUCiAgICAxMDA",
+            "sql": "SELECT creator_address, uniqCombinedMerge(14)(token_count) AS token_count FROM solana.top_token_creators_by_day WHERE (creator_address != '') AND (day > (today() - toIntervalWeek(1))) GROUP BY creator_address ORDER BY token_count DESC LIMIT 100"
+        },
+        {
+            "name": "Daily creator counts",
+            "group": "Solana",
+            "comment": "Daily creator counts. This query limits to the last week which you can remove. The numbers are an estimate and use a materialized view. For accurate numbers, use the tokens table e.g. https://crypto.clickhouse.com?query=LS0gZGFpbHkgY3JlYXRvciBjb3VudHMKU0VMRUNUCiAgICB0b1N0YXJ0T2ZEYXkoYmxvY2tfdGltZXN0YW1wKSBhcyBkYXksCiAgICB1bmlxRXhhY3QoY3JlYXRvcnMgWyAxIF0gLjEpIGFzIGNyZWF0b3JfY291bnQsCiAgICB1bmlxRXhhY3QobWludCkgYXMgdG9rZW5fY291bnQKRlJPTQogICAgc29sYW5hLnRva2VucwpXSEVSRQogICAgYmxvY2tfdGltZXN0YW1wID49IHRvZGF5KCkgLSBJTlRFUlZBTCAxIFdFRUsKR1JPVVAgQlkKICAgIGRheQ ",
+            "sql": "SELECT day, uniqCombinedMerge(14)(creator_count) AS creator_count, uniqCombinedMerge(14)(token_count) AS token_count FROM solana.creator_counts_by_day GROUP BY day ORDER BY day DESC LIMIT 10"
+        },
+        {
+            "name": "Daily txn count by type",
+            "group": "Solana",
+            "comment": "Daily transaction count by type. The results from this query are an estimate and use a materialized view. For accurate numbers, use the transaction table for narrow time ranges (to avoid hitting quota limits) e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoIGJsb2NrX3RpbWVzdGFtcCkgYXMgaG91ciwgc3RhdHVzLCB1bmlxRXhhY3Qoc2lnbmF0dXJlKSBhcyB0eG5fY291bnQgRlJPTSBzb2xhbmEudHJhbnNhY3Rpb25zIFdIRVJFIGJsb2NrX3RpbWVzdGFtcCBCRVRXRUVOICcyMDI0LTA3LTEwIDEyOjAwOjAwJyBBTkQgJzIwMjQtMDctMTAgMTY6MDA6MDAnIEdST1VQIEJZIDEsMiBPUkRFUiBCWSAxIERFU0M",
+            "sql": "SELECT day, status, uniqCombinedMerge(14)(txn_count) AS txn_count FROM solana.txn_count_by_type_by_day GROUP BY day, status ORDER BY day DESC, status"
+        },
+        {
+            "name": "Daily non-voting txn count by type",
+            "group": "Solana",
+            "comment": "Daily transaction count by type. The results from this query are an estimate and use a materialized view. For accurate numbers, use the transaction table for narrow time ranges (to avoid hitting quota limits) e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoIGJsb2NrX3RpbWVzdGFtcCkgYXMgaG91ciwgc3RhdHVzLCB1bmlxRXhhY3Qoc2lnbmF0dXJlKSBhcyB0eG5fY291bnQgRlJPTSBzb2xhbmEudHJhbnNhY3Rpb25zX25vbl92b3RpbmcgV0hFUkUgYmxvY2tfdGltZXN0YW1wOjpEYXRlID0gJzIwMjQtMDctMjYnIEdST1VQIEJZIDEsMiBPUkRFUiBCWSAxIEFTQw ",
+            "sql": "SELECT day, status, uniqCombinedMerge(14)(txn_count) AS txn_count FROM solana.non_voting_txn_count_by_type_by_day GROUP BY day, status ORDER BY day DESC, status DESC"
+        },
+        {
+            "name": "Top errors for failed txns",
+            "group": "Solana",
+            "comment": "Top errors for failed transactions. The results from this query are an estimate and use a materialized view. For accurate numbers, use the transaction table for narrow time ranges (to avoid hitting quota limits) e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoYmxvY2tfdGltZXN0YW1wKSBhcyBob3VyLCB1bmlxRXhhY3Qoc2lnbmF0dXJlKSBBUyB0eG5fY291bnQgRlJPTSBzb2xhbmEudHJhbnNhY3Rpb25zX25vbl92b3RpbmcgV0hFUkUgc3RhdHVzID0gJ0ZhaWwnIEFORCBibG9ja190aW1lc3RhbXA6OkRhdGUgPSAgJzIwMjQtMDEtMDEnIEdST1VQIEJZIDEgT1JERVIgQlkgMSBBU0M",
+            "sql": "SELECT day, status, uniqCombinedMerge(14)(txn_count) AS txn_count FROM solana.non_voting_txn_count_by_type_by_day WHERE status = 'Fail' GROUP BY 1,2 ORDER BY 1 DESC"
+        },
+        {
+            "name": "Daily fees",
+            "group": "Solana",
+            "comment": "Daily fees. This uses a materialized view, grouping by day. For more granular periods use the solana.transactions_non_voting table e.g. https://crypto.clickhouse.com?query=U0VMRUNUIHRvU3RhcnRPZkhvdXIoYmxvY2tfdGltZXN0YW1wKSBhcyBob3VyLCBhdmcoZmVlLzFlOSkgQVMgYXZnX2ZlZV9zb2wsIHN1bShmZWUvMWU5KSBhcyBmZWVfc29sIEZST00gc29sYW5hLnRyYW5zYWN0aW9uc19ub25fdm90aW5nIFdIRVJFIGJsb2NrX3RpbWVzdGFtcDo6ZGF0ZSA9ICAnMjAyNC0wNy0yNicgIEdST1VQIEJZIDEgT1JERVIgQlkgMSBBU0M",
+            "sql": "SELECT day, avgMerge(avg_fee_sol) as avg, sumMerge(fee_sol) as fee_sol FROM solana.daily_fees_by_day GROUP BY day ORDER BY day DESC"
+        },
+        {
+            "name": "Daily signer count",
+            "group": "Solana",
+            "comment": "Daily signer count. The results from this query are an estimate and use a materialized view grouping by day. For more granular periods and exact counts use the solana.transactions_non_voting table e.g. https://crypto.clickhouse.com?query=U0VMRUNUCiAgICB0b1N0YXJ0T2ZIb3VyKGJsb2NrX3RpbWVzdGFtcCkgQVMgaG91ciwKICAgIHVuaXEoKGFjY291bnRzWzFdKS4xKSBBUyBzaWduZXJfY291bnQKRlJPTSBzb2xhbmEudHJhbnNhY3Rpb25zX25vbl92b3RpbmcKV0hFUkUgYmxvY2tfdGltZXN0YW1wOjpEYXRlID0gJzIwMjQtMDctMjAnCkdST1VQIEJZIDEKT1JERVIgQlkgMSBERVNDCgo",
+            "sql": "SELECT day, uniqCombinedMerge(14)(signer_count) AS signer_count FROM solana.daily_fees_by_day GROUP BY 1 ORDER BY 1 DESC"
+        },
+        {
+            "name": "Most active account (for a day)",
+            "group": "Solana",
+            "comment": "Calculates the most active account for a day. Queries over multiple days will likely exceed quotas. We may add a materialized view to compute on request.",
+            "sql": "SELECT account, sum(abs(before - after)) AS absolute_balance_change FROM ( SELECT arrayJoin(balance_changes) AS balance_change, balance_change.1 AS account, balance_change.2 AS before, balance_change.3 AS after FROM solana.transactions_non_voting_mv WHERE block_timestamp::Date = '2024-07-24' ) GROUP BY account ORDER BY absolute_balance_change desc"
+        }
+    ]
+}
