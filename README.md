@@ -1,5 +1,7 @@
 # CryptoHouse
 
+![Crypto UI](./cryptohouse.png)
+
 This repository contains the example queries and materialized views used for [CryptoHouse](https://crypto.clickhouse.com). Users can raise UI issues in this repository, request Materialized views, and suggest example queries.
 
 **The process to deploy example queries and materialized views is currently manual. We intend to automate this process.**
