@@ -117,6 +117,24 @@
             "group": "Solana",
             "comment": "Calculates the most active account for a day. Queries over multiple days will likely exceed quotas. We may add a materialized view to compute on request.",
             "sql": "SELECT account, sum(abs(before - after)) AS absolute_balance_change FROM ( SELECT arrayJoin(balance_changes) AS balance_change, balance_change.1 AS account, balance_change.2 AS before, balance_change.3 AS after FROM solana.transactions_non_voting_mv WHERE block_timestamp::Date = '2024-07-24' ) GROUP BY account ORDER BY absolute_balance_change desc"
+        },
+        {
+            "name": "Transactions per day",
+            "group": "Ethereum",
+            "comment": "Ethereum transactions per day.",
+            "sql":"SELECT toStartOfDay(block_timestamp) AS day, count(*) AS txns FROM ethereum.transactions GROUP BY day ORDER BY day ASC"
+        },
+        {
+            "name":"Gas used per day",
+            "group": "Ethereum",
+            "comment": "Gas used per day.",
+            "sql": "SELECT toStartOfDay(block_timestamp) AS day, sum( receipt_gas_used * gas_price / 1e18) AS total_gas_fee_eth FROM ethereum.transactions WHERE day > '2023-07-12' GROUP BY day ORDER BY day DESC"
+        },
+        {
+            "name": "Daily new addresses",
+            "group": "Ethereum",
+            "comment": "Daily new addresses. These uses a materialized view and provides estimates. Users can get an exact account by appending FINAL to the table name e.g. https://crypto.clickhouse.com?query=U0VMRUNUCiAgdG9TdGFydE9mRGF5KG1pbl9kYXRlKSBhcyBkYXksCiAgY291bnQoKSBBUyBuZXdfdXNlcnMKRlJPTQogIGV0aGVyZXVtLmZpcnN0X3RpbWVfZm9yX2FkZHJlc3MgRklOQUwKV0hFUkUKICBkYXkgPiAnMjAyMy0wNy0xMicKR1JPVVAgQlkKICBkYXkKT1JERVIgQlkKICBkYXkgQVND",
+            "sql": "SELECT toStartOfDay(min_date) as day, count() AS new_users, sum(new_users) OVER (ORDER BY day ASC) AS total_addresses FROM ethereum.first_time_for_address WHERE day > '2023-07-12' GROUP BY day ORDER BY day ASC"
         }
     ]
 }
