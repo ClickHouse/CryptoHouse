@@ -17,3 +17,11 @@ Raise an issue in this repository using the relevant template.
 ## Requesting a Materialized View
 
 Materialized views can be used to accelerate specific queries. We will consider adding materialized views if they are generic and can be used across a number of queries. Please raise a "Request Materialized View" issue in this repository.
+
+## Direct connections
+
+Users can connect directly to the ClickHouse instance using the [ClickHouse Client](https://clickhouse.com/docs/en/interfaces/cli).
+
+```bash
+clickhouse client --host crypto-clickhouse.clickhouse.com --secure --user crypto --password ''
+```
