@@ -8,7 +8,7 @@ This repository contains the example queries and materialized views used for [Cr
 
 ## Contributing example queries
 
-Fork this repository and raise a PR on the [queries.json](./queries. JSON) file. Once the PR is approved, this query will be deployed to the ClickHouse instance (currently manually).
+Fork this repository and raise a PR on the [queries.json](./queries.json) file. Once the PR is approved, this query will be deployed to the ClickHouse instance (currently manually).
 
 ## Reporting UI or Performance issues with CryptoHouse
 
