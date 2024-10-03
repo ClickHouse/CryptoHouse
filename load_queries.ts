@@ -22,7 +22,9 @@ interface Query {
   name: string;
   group: string;
   comment?: string;
-  sql: string;
+  query: string;
+  chart: string;
+  format?: boolean;
 }
 
 const loadQueries = async () => {
@@ -45,7 +47,9 @@ const loadQueries = async () => {
             id FixedString(26) MATERIALIZED generateULID(),
             name String,
             group String,
-            query String
+            query String,
+            chart String DEFAULT '{"type":"line"}',
+            format Bool
           )
           ENGINE = MergeTree()
           ORDER BY id
@@ -61,7 +65,9 @@ const loadQueries = async () => {
             {
               name: query.name,
               group: query.group,
-              query: query.comment ? `--${query.comment}\n${query.sql}` : query.sql,
+              query: query.comment ? `--${query.comment}\n${query.query}` : query.query,
+              chart: query.chart,
+              format: query.format ? true: false
             },
           ],
           format: 'JSONEachRow',
