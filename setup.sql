@@ -600,3 +600,4 @@ GRANT SELECT ON system.settings_profiles TO monitor_admin;
 -- quotas
 
 CREATE QUOTA crypto KEYED BY ip_address FOR INTERVAL 1 hour MAX queries = 60, result_rows = 3000000000, read_rows = 3000000000000, execution_time = 6000 TO crypto
+CREATE QUOTA monitor KEYED BY ip_address FOR INTERVAL 1 hour MAX queries = 1200 TO monitor
