@@ -25,3 +25,12 @@ Users can connect directly to the ClickHouse instance using the [ClickHouse Clie
 ```bash
 clickhouse client --host crypto-clickhouse.clickhouse.com --secure --user crypto --password ''
 ```
+
+## Load queries
+
+```bash
+export CLICKHOUSE_URL=https://crypto-clickhouse.clickhouse.com
+export CLICKHOUSE_PASSWORD=<password>
+
+npm run load_queries
+```

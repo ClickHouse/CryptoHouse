@@ -2,9 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { createClient } from "@clickhouse/client";
 
-
 const CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
-const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER;
+const CLICKHOUSE_USER = process.env.CLICKHOUSE_USER || 'default';
 const CLICKHOUSE_PASSWORD = process.env.CLICKHOUSE_PASSWORD;
 
 if (!CLICKHOUSE_URL || !CLICKHOUSE_USER || !CLICKHOUSE_PASSWORD) {
@@ -19,12 +18,14 @@ const client = createClient({
 });
 
 interface Query {
+  id?: string;
   name: string;
   group: string;
   comment?: string;
   query: string;
   chart: string;
   format?: boolean;
+  params?: string
 }
 
 const loadQueries = async () => {
@@ -44,12 +45,13 @@ const loadQueries = async () => {
         query: `
           CREATE TABLE IF NOT EXISTS default.queries_temp
           (
-            id FixedString(26) MATERIALIZED generateULID(),
+            id String DEFAULT generateULID(),
             name String,
             group String,
             query String,
             chart String DEFAULT '{"type":"line"}',
-            format Bool
+            format Bool,
+            params String DEFAULT '{}'
           )
           ENGINE = MergeTree()
           ORDER BY id
@@ -59,17 +61,20 @@ const loadQueries = async () => {
 
       // Insert data into the temporary table
       for (const query of queries.queries) {
+        const row = {
+          name: query.name,
+          group: query.group,
+          query: query.comment ? `--${query.comment}\n${query.query}` : query.query,
+          chart: query.chart,
+          format: query.format ? true: false,
+          params: query.params ? query.params: {}
+        };
+        if (query.id) {
+          row['id'] = query.id;
+        }
         await client.insert({
           table: "default.queries_temp",
-          values: [
-            {
-              name: query.name,
-              group: query.group,
-              query: query.comment ? `--${query.comment}\n${query.query}` : query.query,
-              chart: query.chart,
-              format: query.format ? true: false
-            },
-          ],
+          values: [row],
           format: 'JSONEachRow',
         });
         console.log(`Inserted query: ${query.name} into queries_temp`);
